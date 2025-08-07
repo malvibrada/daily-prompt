@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Prompt</title>
+</head>
+<body style="font-family: monospace; color: black; background: white; padding: 1em; max-width: 400px; margin: auto;">
+  <form id="promptForm">
+    <label for="user_id">Who are you?</label><br>
+    <input type="text" id="user_id" name="user_id" required style="width: 100%; margin-bottom: 1em;"><br>
+    
+    <label for="prompt">What should I animate today?</label><br>
+    <textarea id="prompt" name="prompt" rows="4" required style="width: 100%; margin-bottom: 1em;"></textarea><br>
+    
+    <button type="submit">Send</button>
+  </form>
+
+  <p id="message" style="margin-top: 1em;"></p>
+
+  <script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwzsMaGLvxG06cNar-Q2y4J-PHL508UsNV8-XSOedF9HMyGOUPh_p-rR7mOk6_oYczASg/exec";
+
+  document.getElementById("promptForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const prompt = document.getElementById("prompt").value;
+    const user_id = document.getElementById("user_id").value;
+
+    const res = await fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify({ prompt, user_id }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const result = await res.json();
+    const msg = document.getElementById("message");
+
+    if (result.status === "ok") {
+      msg.textContent = "Your animation is being drawn.";
+    } else if (result.status === "locked") {
+      msg.textContent = "Today's prompt has already been submitted. Come back tomorrow.";
+    } else if (result.status === "forbidden") {
+      msg.textContent = "Your prompt contains violent language. Try something else.";
+    } else {
+      msg.textContent = "Something went wrong. Try again later.";
+    }
+
+    document.getElementById("promptForm").reset();
+  });
+  </script>
+</body>
+</html>
